@@ -26,15 +26,26 @@ def read_synset_mapping(path):
 SYNSET_MAPPING = read_synset_mapping(config.SYNSET_MAPPING_FILE)
 
 
-def get_label_id(label: str):
-    label = label.lower()
+def get_labelid_from_labelname(label: str):
     matching_index = np.where(SYNSET_MAPPING == label)
     if len(matching_index[0]) == 0:
+        label = label.lower()
+        matching_index = np.where(SYNSET_MAPPING == label)
+        if len(matching_index[0]) == 0:
+            return None
+    rows = matching_index[0]
+    return SYNSET_MAPPING[rows]
+
+
+def get_labelname_from_labelid(labelid):
+    matching_index = np.where(SYNSET_MAPPING == labelid)
+    if len(matching_index[0]) == 0:
         return None
-    return SYNSET_MAPPING[matching_index[0][0], 0]
+    rows = matching_index[0][0]
+    return np.delete(SYNSET_MAPPING[rows],SYNSET_MAPPING[rows]=="")[1:]
 
 
-def get_label_contain(label: str):
+def get_labelname_contain(label: str):
     label = label.lower()
     matching_index = np.where(np.char.find(SYNSET_MAPPING, label) >= 0)
     if len(matching_index[0]) == 0:
@@ -42,7 +53,7 @@ def get_label_contain(label: str):
     return SYNSET_MAPPING[matching_index].tolist()
 
 
-def random_images_from_id(label_id, num):
+def random_images_from_labelid(label_id, num):
     images_path = glob.glob(os.path.join(config.IMAGE_FOLDER, label_id) + "/*")
     random_index = np.random.choice(len(images_path), num)
     images = []
@@ -51,3 +62,8 @@ def random_images_from_id(label_id, num):
         images.append(image)
     return images
     pass
+
+def get_num_data_from_labelid(labelid):
+    paths = glob.glob(os.path.join(config.IMAGE_FOLDER,str(labelid))+"/*")
+    print(paths[0])
+    return len(paths)
